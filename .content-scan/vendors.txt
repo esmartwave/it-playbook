@@ -1,0 +1,36 @@
+Jira
+Confluence
+Slack
+Zoom
+Salesforce
+Workday
+ServiceNow
+Trello
+Asana
+Notion
+Okta
+Duo
+Jamf
+Kandji
+Intune
+CrowdStrike
+SentinelOne
+GitHub
+GitLab
+Bitbucket
+Snowflake
+Databricks
+Tableau
+Looker
+Google Workspace
+Microsoft 365
+SharePoint
+OneDrive
+Dropbox
+Box
+Claude
+ChatGPT
+OpenAI
+Anthropic
+Gemini
+Copilot

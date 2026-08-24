@@ -1,0 +1,17 @@
+#!/bin/sh
+# Content scan pre-commit hook.
+#
+# A scan that only fires in CI catches the problem after it is already in a
+# commit — and for identity leakage the commit is the event you are trying to
+# prevent. Install with:
+#
+#     ln -s ../../.content-scan/pre-commit .git/hooks/pre-commit
+#
+# Set CONTENT_SCAN_SALT in your shell profile so the name and organization
+# denylists load. Without it the hook still runs, but rules 1.4a and 1.5 are
+# inert and it will say so.
+
+set -e
+staged=$(git diff --cached --name-only --diff-filter=ACMR -- '*.md')
+[ -z "$staged" ] && exit 0
+echo "$staged" | xargs python3 "$(git rev-parse --show-toplevel)/.content-scan/scan.py"

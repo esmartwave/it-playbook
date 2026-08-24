@@ -1,0 +1,6 @@
+.DS_Store
+
+# Plaintext denylists are the disclosure the content scan exists to prevent.
+# Only the salted hashes are committed. See .content-scan/README.md.
+.content-scan/known-names.txt
+.content-scan/known-orgs.txt
