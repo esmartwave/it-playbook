@@ -458,11 +458,18 @@ def readme_index_check(scanner: Scanner, files: list[Path]):
         return
     text = readme.read_text(encoding="utf-8")
 
-    listed = {m.group(1) for m in re.finditer(r"\]\((?!https?:)([^)#]+\.md)\)", text)}
+    listed = {
+        # str.lstrip("./") strips a character set, not a prefix, and would eat
+        # the leading dot of a path like .content-scan/README.md.
+        m.group(1)[2:] if m.group(1).startswith("./") else m.group(1)
+        for m in re.finditer(r"\]\((?!https?:)([^)#]+\.md)\)", text)
+    }
     on_disk = {relpath(p) for p in files if p.name != "README.md"}
-    for missing in sorted(on_disk - {l.lstrip("./") for l in listed}):
+    for missing in sorted(on_disk - listed):
         scanner.emit("README.md", 1, WARN, "readme-index-missing", missing)
-    for stale in sorted({l.lstrip("./") for l in listed} - on_disk):
+    # Stale means the link points at nothing. A link to a real file that the
+    # scan does not cover — .content-scan/README.md — is not stale.
+    for stale in sorted(l for l in listed - on_disk if not (ROOT / l).exists()):
         scanner.emit("README.md", 1, WARN, "readme-index-stale", stale)
 
     documented = {m.group(1) for m in PLACEHOLDER.finditer(text)}
