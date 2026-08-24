@@ -48,7 +48,7 @@ You have to take these actions:
 * 2
 * 3
 
-If you run into problems, email ermamurman@mirrormurmurs.com.
+If you run into problems, email [IT HELPDESK EMAIL].
 
 ## Rollouts / Changes to Key Systems
 
