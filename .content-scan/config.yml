@@ -1,0 +1,59 @@
+# Content scan configuration.
+# See content-scan-spec.md for the rationale behind every rule below.
+
+# Paths never scanned (glob, relative to repo root).
+exclude:
+  - ".git/**"
+  - ".content-scan/**"
+  - "LICENSE"
+
+# Structural checks skip these paths (they are process documents about the
+# library, not templates in it). Tier 1 identity rules still apply to them —
+# a planning document is as capable of naming a real person as a policy is.
+structure_exempt:
+  - "README.md"
+  - "meta/consolidation-plan.md"
+  - "meta/content-scan-spec.md"
+
+# Spec §2.2 — documents that are *about* a specific tool.
+# Only relevant when the vendor rule (§2.1) is enabled.
+vendor_check_exempt:
+  - "standards/ai-solution-deployment-standard.md"
+  - "standards/agentic-sdlc-standard-and-configuration.md"
+  - "procedures/code-review-and-vulnerability-check-runbook.md"
+
+# Spec §2.1 — off by default. Tool references are scrubbed at the point of reuse.
+rules:
+  vendor_in_mandate:
+    enabled: false
+
+# Spec §2.3 — standing allowlist. A line containing one of these terms is not
+# flagged by the organization-suffix or vendor rules.
+allow_terms:
+  - "Microsoft STRIDE"
+  - "CIS Benchmarks"
+  - "AWS Foundational Security Best Practices"
+  - "GitHub Security Advisories"
+  - "GitHub Advisory Database"
+  - "MITRE ATT&CK"
+  - "Openwall oss-security"
+  - "Keep a Changelog"
+  - "Semantic Versioning"
+  - "ISO 27001"
+  - "SOC 2"
+  - "NIST CSF"
+  - "PCI DSS"
+
+# Required frontmatter keys (spec §2.5).
+frontmatter_required:
+  - title
+  - document_type
+  - version
+  - status
+  - owner
+
+# Salt canary — sha256(CONTENT_SCAN_SALT + "content-scan-canary").
+# Regenerate with: python3 .content-scan/scan.py --print-canary
+# CI verifies this reproduces, so a missing or rotated salt fails loudly
+# instead of silently disabling the name and organization rules.
+salt_canary: "ae3fc1ad4214c3704702493b5efe6646e5aaa82cc911135813826224f94c94e0"

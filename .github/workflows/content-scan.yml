@@ -1,0 +1,53 @@
+name: Content scan
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    name: Gate changed documents
+    runs-on: ubuntu-latest
+    env:
+      CONTENT_SCAN_SALT: ${{ secrets.CONTENT_SCAN_SALT }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Collect changed markdown
+        id: changed
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            base="${{ github.event.pull_request.base.sha }}"
+            head="${{ github.event.pull_request.head.sha }}"
+          else
+            base="${{ github.event.before }}"
+            head="${{ github.sha }}"
+          fi
+          git diff --name-only --diff-filter=ACMR "$base" "$head" -- '*.md' > changed.txt || true
+          echo "count=$(wc -l < changed.txt)" >> "$GITHUB_OUTPUT"
+          cat changed.txt
+
+      # The gate scans what this change introduces. The pre-consolidation
+      # backlog is reported by the baseline job below, not merged into the gate:
+      # a gate that fails on inherited debt gets switched off within a month.
+      - name: Scan changed documents
+        if: steps.changed.outputs.count != '0'
+        run: xargs -a changed.txt -d '\n' -r python3 .content-scan/scan.py --require-denylist
+
+  baseline:
+    name: Full-tree baseline (advisory)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    env:
+      CONTENT_SCAN_SALT: ${{ secrets.CONTENT_SCAN_SALT }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan whole working tree
+        run: python3 .content-scan/scan.py --require-denylist
